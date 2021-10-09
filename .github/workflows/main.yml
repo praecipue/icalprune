@@ -1,0 +1,21 @@
+name: Prune and push
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: 11,41 6-20 * * *
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: icalprune
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        with:
+          ICAL_URL: ${{ secrets.ICAL_URL }}
+        uses: praecipue/icalprune@main
+        
