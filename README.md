@@ -1,0 +1,1 @@
+# Publish pruned ical events to gh-pages action

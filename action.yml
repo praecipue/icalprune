@@ -1,0 +1,20 @@
+name: 'Publish pruned ical events to gh-pages'
+description: 'Prune events by defined days count and publish to csv'
+author: 'praecipue'
+inputs: 
+  ICAL_URL:
+    description: 'URL to get .ics file'
+    required: true
+  DAYS:
+    description: 'Define days ago to prune'
+    default: '60'
+runs:
+  using: 'composite'
+  steps:
+    - run: |
+        python3 ${{ github.action_path }}/process_ical.py ${{ inputs.DAYS }}
+        echo ${{ github.run_number }} > public/index.html
+        ${{ github.action_path }}/entrypoint.sh
+      shell: bash
+      env:
+        INPUT_ICAL_URL: ${{ inputs.ICAL_URL }}
