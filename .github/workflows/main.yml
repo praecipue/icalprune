@@ -17,5 +17,6 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
         with:
           ICAL_URL: ${{ secrets.ICAL_URL }}
+          COMPARE_URL: 'https://praecipue.github.io/icalprune/pruned.tsv'
         uses: praecipue/icalprune@main
         
