@@ -3,7 +3,7 @@ PUSH=0
 python3 ${PROCESS_ICAL_PATH} ${INPUT_DAYS} &
 mkdir -p public && echo ${RUN_NUMBER} > public/index.html
 [ -n "${COMPARE_URL}" ] && { wget -q "${COMPARE_URL}" -O prev.tsv || PUSH=1; }
-fg
+wait
 [ ${PUSH} = 0 ] && diff -q -s prev.tsv public/pruned.tsv && exit 0 || true
 cd public
 # based on https://github.com/BryanSchuetz/jekyll-deploy-gh-pages/blob/master/entrypoint.sh
