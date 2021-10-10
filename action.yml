@@ -8,13 +8,17 @@ inputs:
   DAYS:
     description: 'Define days ago to prune'
     default: '60'
+  COMPARE_URL:
+    description: 'Push only when file at compared url is diffrent'
+    default: ''
 runs:
   using: 'composite'
   steps:
-    - run: |
-        python3 ${{ github.action_path }}/process_ical.py ${{ inputs.DAYS }}
-        echo ${{ github.run_number }} > public/index.html
-        bash ${{ github.action_path }}/entrypoint.sh
+    - run: . ${{ github.action_path }}/entrypoint.sh
       shell: bash
       env:
         INPUT_ICAL_URL: ${{ inputs.ICAL_URL }}
+        PROCESS_ICAL_PATH: ${{ github.action_path }}/process_ical.py
+        INPUT_DAYS: ${{ inputs.DAYS }}
+        RUN_NUMBER: ${{ github.run_number }}
+        COMPARE_URL: ${{ input.COMPARE_URL }}
