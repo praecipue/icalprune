@@ -21,4 +21,4 @@ runs:
         PROCESS_ICAL_PATH: ${{ github.action_path }}/process_ical.py
         INPUT_DAYS: ${{ inputs.DAYS }}
         RUN_NUMBER: ${{ github.run_number }}
-        COMPARE_URL: ${{ input.COMPARE_URL }}
+        COMPARE_URL: ${{ inputs.COMPARE_URL }}
