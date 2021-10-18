@@ -2,6 +2,7 @@ import gzip
 import os, time
 import urllib.request
 from datetime import datetime, timedelta
+from collections import OrderedDict
 
 import csv
 
@@ -68,14 +69,14 @@ def parse_date(value):
 def format_date(date):
     return date.strftime(OUTFORMAT)
 
-RULES = {
-    'S': ['sopran'],
-    'A': ['alt'],
-    'T': ['tenor'],
-    'B': ['bas'],
-    'Z': ['zarzad', 'zarząd'],
-    't': ['tutti']
-}
+RULES = OrderedDict([
+    ('S', ['sopran']),
+    ('A', ['alt']),
+    ('T', ['tenor']),
+    ('B', ['bas']),
+    ('Z', ['zarzad', 'zarząd']),
+    ('t', ['tutti']),
+])
 
 def extract_info(*texts):
     groups = set()
