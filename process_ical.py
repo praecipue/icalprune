@@ -79,7 +79,7 @@ RULES = OrderedDict([
 ])
 
 def extract_info(*texts):
-    groups = set()
+    groups, grouplist = set(), []
     for t in texts:
         if not t:
             continue
@@ -89,8 +89,9 @@ def extract_info(*texts):
                 for pattern in patterns:
                     if pattern in t:
                         groups.add(sym)
+                        grouplist.append(sym)
                         break
-    return groups
+    return grouplist
 
 
 def process(bytedata, encoding='utf-8'):
