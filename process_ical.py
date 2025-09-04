@@ -3,6 +3,7 @@ import os, time
 import urllib.request
 from datetime import datetime, timedelta
 from collections import OrderedDict
+import re
 
 import csv
 
@@ -69,28 +70,34 @@ def parse_date(value):
 def format_date(date):
     return date.strftime(OUTFORMAT)
 
-RULES = OrderedDict([
-    ('S', ['sopran']),
-    ('A', ['alt']),
-    ('T', ['tenor']),
-    ('B', ['bas']),
-    ('Z', ['zarzad', 'zarząd']),
-    ('t', ['tutti']),
-])
+RULES = [
+    (['S'], re.compile(r'(?:\b|[0-9])sopr(?:an|\b)'), lambda ttype: True),
+    (['A'], re.compile(r'(?:\b|[0-9])alt'), lambda ttype: True),
+    (['T'], re.compile(r'(?:\b|[0-9])tenor'), lambda ttype: True),
+    (['B'], re.compile(r'(?:\b|[0-9])bas'), lambda ttype: True),
+    (['Z'], re.compile(r'(?:\b|[0-9])zarz[aą]d'), lambda ttype: True),
+    (['t'], re.compile(r'tutti'), lambda ttype: True),
+    (['S','A'], re.compile(r'\b(?:panie|dla +pan|pań)\b'), lambda ttype: ttype == 'summary'),
+    (['T','B'], re.compile(r'\b(?:panowie|pan[óo]w)\b'), lambda ttype: ttype == 'summary'),
+    (['t'], re.compile(r'\bwszys(?:cy|tkich)\b'), lambda ttype: ttype == 'summary'),
+    ([''], re.compile(r'\b(?:próby + nie +ma|nie +ma +próby)\b'), lambda ttype: ttype == 'summary'),
+]
 
-def extract_info(*texts):
+def extract_info(summary, location, description):
     groups, grouplist = set(), []
-    for t in texts:
+    texts = [('summary', summary),('location', location),('description', description)]
+    for ttype, t in texts:
         if not t:
             continue
         t = t.lower()
-        for sym, patterns in RULES.items():
-            if sym not in groups:
-                for pattern in patterns:
-                    if pattern in t:
-                        groups.add(sym)
-                        grouplist.append(sym)
-                        break
+        for syms, pattern, ttype_check in RULES:
+            if not ttype_check(ttype):
+                continue
+            newsyms = [ sym for sym in syms if sym not in groups ]
+            if len(newsyms) > 0:
+                if pattern.search(t):
+                    grouplist.extend(newsyms)
+                    groups.update(newsyms)
     return grouplist
 
 
@@ -162,6 +169,10 @@ def dump_csv(eventlist, path):
         writer = csv.writer(fd, delimiter='\t', quoting=csv.QUOTE_MINIMAL, escapechar='\\', lineterminator='\n')
         for (start, end, duration, summary, location, description,
                 uid, created, modified, groups) in eventlist:
+            #if '' in groups and len(groups) > 1:
+            #    if description:
+            #        description.append('\n(wykryto odwołaną próbę; wykryte grupy: [{}])'.format(''.join(groups)))
+            #    groups = []
             writer.writerow((
                 format_date(start) if start else '', duration.seconds, summary, location, description, uid,
                 format_date(created) if created else '', format_date(modified) if modified else '', ''.join(groups)
@@ -173,5 +184,3 @@ if __name__ == "__main__":
     days = int(sys.argv[1])
     data = get_url_compressed(URL)
     dump_csv(filter_time(process(data), datetime.now().astimezone()-timedelta(days=days)), f'public/pruned.tsv')
-
-
